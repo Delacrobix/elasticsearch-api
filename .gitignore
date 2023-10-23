@@ -1,0 +1,7 @@
+enunciado.pdf
+.env
+package-lock.json
+
+# FOLDERS
+/.vscode
+/node_modules
