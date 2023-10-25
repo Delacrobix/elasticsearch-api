@@ -1,9 +1,11 @@
-import client from '../elasticsearch/config';
-import { dataset } from '../utils/dummyData';
+import client from '../config/elasticsearch.js';
+import { dataset } from '../utils/dummyData.js';
 
 // POST path: /{indexName}/documents
 export async function bulkInsertDocuments(req, res) {
   const indexName = req.params.indexName;
+
+  //! Replace this for body content
   const data = [...dataset];
 
   try {
