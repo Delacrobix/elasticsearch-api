@@ -1,12 +1,15 @@
 import client from '../config/elasticsearch.js';
-import { dataset } from '../utils/dummyData.js';
 
 // POST path: /{indexName}/documents
 export async function bulkInsertDocuments(req, res) {
-  const indexName = req.params.indexName;
+  const { indexName } = req.params;
+  const data = req.body;
 
-  //! Replace this for body content
-  const data = [...dataset];
+  if (!data) {
+    return res.status(400).json({
+      response: 'Bad Request. Data field is empty',
+    });
+  }
 
   try {
     const operations = data.flatMap((doc) => [
@@ -48,9 +51,14 @@ export async function bulkInsertDocuments(req, res) {
 
 // PUT path:/{indexName}/document/{id}
 export async function addDocument(req, res) {
-  const indexName = req.params.indexName;
-  const id = req.params.id;
+  const { indexName, id } = req.params;
   const data = req.body;
+
+  if (!data) {
+    return res.status(400).json({
+      response: 'Bad Request. Empty data',
+    });
+  }
 
   try {
     const response = await client.index({
@@ -61,6 +69,7 @@ export async function addDocument(req, res) {
 
     return res.status(200).json({
       response: 'Success',
+      details: response,
     });
   } catch (e) {
     throw new Error(e);
@@ -69,8 +78,8 @@ export async function addDocument(req, res) {
 
 // GET path: /{indexName}/documents/{id}
 export async function getDocument(req, res) {
-  const indexName = req.params.indexName;
-  const id = req.params.id;
+  const { indexName } = req.params;
+  const { id } = req.params;
 
   try {
     const result = await client.search({
@@ -82,6 +91,7 @@ export async function getDocument(req, res) {
       },
     });
 
+    //If document id doesn't exist
     if (result.hits.total.value == 0) {
       return res.status(404).json({
         response: 'Error',
@@ -94,7 +104,14 @@ export async function getDocument(req, res) {
       });
     }
   } catch (e) {
-    throw new Error(e);
+    //If index doesn't exist
+    if (e.statusCode == 404) {
+      return res.status(404).json({
+        response: 'Index not found',
+      });
+    } else {
+      throw new Error(e);
+    }
   }
 }
 
@@ -103,9 +120,19 @@ export async function searchDocuments(req, res) {
   const { q, filters } = req.query;
   const { indexName } = req.params;
 
+  if (!q) {
+    return res.status(400).json({
+      response: 'Bad Request. Data field is empty',
+    });
+  } else if (!filters) {
+    return res.status(400).json({
+      response: 'Bad Request. Filters field is empty',
+    });
+  }
+
   const filtersArray = JSON.parse(filters);
 
-  let filtersJson = filtersArray.map((filter) => {
+  const filtersJson = filtersArray.map((filter) => {
     const fieldName = Object.keys(filter)[0];
     const fieldValue = filter[fieldName];
 
@@ -136,11 +163,26 @@ export async function searchDocuments(req, res) {
       },
     });
 
-    return res.status(200).json({
-      result,
-    });
+    // If no documents are found
+    if (result.hits.total.value == 0) {
+      return res.status(404).json({
+        response: 'Nothing found',
+      });
+    } else {
+      return res.status(200).json({
+        response: 'Success',
+        data: result.hits,
+      });
+    }
   } catch (e) {
-    throw new Error(e);
+    //If index doesn't exist
+    if (e.statusCode == 404) {
+      return res.status(404).json({
+        response: 'Index not found',
+      });
+    } else {
+      throw new Error(e);
+    }
   }
 }
 
@@ -153,6 +195,7 @@ export async function getIndexDocuments(req, res) {
       index: indexName,
     });
 
+    // If no documents are found
     if (result.hits.total.value == 0) {
       return res.status(404).json({
         response: 'Error',
@@ -170,23 +213,16 @@ export async function getIndexDocuments(req, res) {
       });
     }
   } catch (e) {
-    throw new Error(e);
+    //If index doesn't exist
+    if (e.statusCode == 404) {
+      return res.status(404).json({
+        response: 'Index not found',
+      });
+    } else {
+      throw new Error(e);
+    }
   }
 }
-
-// 1.- POST {indexName}/documents
-// Permite agregar documentos en lotes, recibe un array de objetos JSON y utiliza la _bulk API de elasticsearch
-
-// 2. PUT {indexName}/document/{id}
-// Permite agregar un documento con la id {id}
-
-// 3.- GET {indexName}/documents/{id}
-// Permite retornar documento con id {id}
-
-// 4.- GET {indexName}/search?q={q}&filters={filters}
-// Donde {q} es la palabra que quiero buscar, {filters} es un array de filtros en el siguiente formato [{"campo":"valor"}]
-
-// Reglas:
 
 // 4. La aplicación debe estar disponible online (ocupar cualquier servicio gratuito como railway, o vercel)
 // 7. La API debe incluir documentación online, hay librerías que la generan automático , ej: https://github.com/swagger-autogen/swagger-autogen

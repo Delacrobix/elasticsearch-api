@@ -1,18 +1,56 @@
 const elasticApiDocs = {
-  swagger: '2.0',
+  openapi: '3.0.0',
   info: {
-    title: 'API Elasticsearch',
-    description: 'description',
+    title: 'Elasticsearch API',
     version: '1.0.0',
+    description: 'API for managing Elasticsearch documents and indices.',
   },
-  host: '',
-  basePath: '/',
+  servers: [
+    {
+      url: '',
+    },
+  ],
   paths: {
     '/{indexName}/documents': {
+      get: {
+        summary: 'Get documents from an index',
+        parameters: [
+          {
+            name: 'indexName',
+            in: 'path',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Successful response',
+            content: {
+              'application/json': {
+                example: {
+                  response: 'Success',
+                  count: 10,
+                  data: [],
+                },
+              },
+            },
+          },
+          404: {
+            description: 'Index not found',
+            content: {
+              'application/json': {
+                example: {
+                  response: 'Index not found',
+                },
+              },
+            },
+          },
+        },
+      },
       post: {
-        summary: 'Bulk Insert Documents',
-        description:
-          'Insert multiple documents into the specified Elasticsearch index.',
+        summary: 'Bulk insert documents into an index',
         parameters: [
           {
             name: 'indexName',
@@ -24,32 +62,33 @@ const elasticApiDocs = {
           },
         ],
         requestBody: {
-          description: 'Array of documents to insert.',
+          required: true,
           content: {
             'application/json': {
-              schema: {
-                type: 'array',
+              example: {
+                data: [],
               },
             },
           },
         },
         responses: {
           200: {
-            description: 'Success',
+            description: 'Successful response',
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    response: {
-                      type: 'string',
-                      example: 'Success',
-                    },
-                    count: {
-                      type: 'integer',
-                      example: 10,
-                    },
-                  },
+                example: {
+                  response: 'Success',
+                  count: 10,
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                example: {
+                  response: 'Bad Request. Data field is empty',
                 },
               },
             },
@@ -59,8 +98,7 @@ const elasticApiDocs = {
     },
     '/{indexName}/document/{id}': {
       put: {
-        summary: 'Add Document',
-        description: 'Add a document to the specified Elasticsearch index.',
+        summary: 'Add a document to an index',
         parameters: [
           {
             name: 'indexName',
@@ -80,28 +118,33 @@ const elasticApiDocs = {
           },
         ],
         requestBody: {
-          description: 'Document data to add.',
+          required: true,
           content: {
             'application/json': {
-              schema: {
-                type: 'object',
+              example: {
+                data: {},
               },
             },
           },
         },
         responses: {
           200: {
-            description: 'Success',
+            description: 'Successful response',
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    response: {
-                      type: 'string',
-                      example: 'Success',
-                    },
-                  },
+                example: {
+                  response: 'Success',
+                  details: {},
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                example: {
+                  response: 'Bad Request. Empty data',
                 },
               },
             },
@@ -111,9 +154,7 @@ const elasticApiDocs = {
     },
     '/{indexName}/documents/{id}': {
       get: {
-        summary: 'Get Document',
-        description:
-          'Retrieve a document from the specified Elasticsearch index.',
+        summary: 'Get a document by ID',
         parameters: [
           {
             name: 'indexName',
@@ -134,44 +175,23 @@ const elasticApiDocs = {
         ],
         responses: {
           200: {
-            description: 'Success',
+            description: 'Successful response',
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    response: {
-                      type: 'string',
-                      example: 'Success',
-                    },
-                    data: {
-                      type: 'object',
-                      example: {
-                        field1: 'value1',
-                        field2: 'value2',
-                      },
-                    },
-                  },
+                example: {
+                  response: 'success',
+                  data: {},
                 },
               },
             },
           },
           404: {
-            description: 'Error',
+            description: 'Document not found',
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    response: {
-                      type: 'string',
-                      example: 'Error',
-                    },
-                    message: {
-                      type: 'string',
-                      example: 'Document not found',
-                    },
-                  },
+                example: {
+                  response: 'Error',
+                  message: 'Document not found',
                 },
               },
             },
@@ -181,9 +201,7 @@ const elasticApiDocs = {
     },
     '/{indexName}/search': {
       get: {
-        summary: 'Search Documents',
-        description:
-          'Search for documents in the specified Elasticsearch index.',
+        summary: 'Search for documents in an index',
         parameters: [
           {
             name: 'indexName',
@@ -193,8 +211,6 @@ const elasticApiDocs = {
               type: 'string',
             },
           },
-        ],
-        parameters: [
           {
             name: 'q',
             in: 'query',
@@ -206,35 +222,6 @@ const elasticApiDocs = {
           {
             name: 'filters',
             in: 'query',
-            required: false,
-            schema: {
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          200: {
-            description: 'Success',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    '/{indexName}/documents': {
-      get: {
-        summary: 'Get Index Documents',
-        description:
-          'Retrieve all documents from the specified Elasticsearch index.',
-        parameters: [
-          {
-            name: 'indexName',
-            in: 'path',
             required: true,
             schema: {
               type: 'string',
@@ -243,51 +230,32 @@ const elasticApiDocs = {
         ],
         responses: {
           200: {
-            description: 'Success',
+            description: 'Successful response',
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    response: {
-                      type: 'string',
-                      example: 'Success',
-                    },
-                    count: {
-                      type: 'integer',
-                      example: 10,
-                    },
-                    data: {
-                      type: 'array',
-                      items: {
-                        type: 'object',
-                        example: {
-                          field1: 'value1',
-                          field2: 'value2',
-                        },
-                      },
-                    },
-                  },
+                example: {
+                  response: 'Success',
+                  data: {},
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                example: {
+                  response: 'Bad Request. Data field is empty',
                 },
               },
             },
           },
           404: {
-            description: 'Error',
+            description: 'Index not found',
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    response: {
-                      type: 'string',
-                      example: 'Error',
-                    },
-                    message: {
-                      type: 'string',
-                      example: 'Index not found',
-                    },
-                  },
+                example: {
+                  response: 'Index not found',
                 },
               },
             },
