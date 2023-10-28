@@ -1,5 +1,12 @@
 import client from '../config/elasticsearch.js';
 
+// GET path: /health
+export async function healthStatus() {
+  return res.status(200).json({
+    response: 'Ok',
+  });
+}
+
 // POST path: /{indexName}/documents
 export async function bulkInsertDocuments(req, res) {
   const { indexName } = req.params;

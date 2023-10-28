@@ -5,10 +5,12 @@ import {
   getDocument,
   searchDocuments,
   getIndexDocuments,
+  healthStatus,
 } from '../controllers/documentControllers.js';
 
 const elasticRouter = Router();
 
+elasticRouter.get('/health', healthStatus);
 elasticRouter.post('/:indexName/documents', bulkInsertDocuments);
 elasticRouter.put('/:indexName/document/:id', addDocument);
 elasticRouter.get('/:indexName/documents/:id', getDocument);
