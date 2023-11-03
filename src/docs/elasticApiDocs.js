@@ -5,11 +5,6 @@ const elasticApiDocs = {
     version: '1.0.0',
     description: 'API for managing Elasticsearch documents and indices.',
   },
-  servers: [
-    {
-      url: '',
-    },
-  ],
   paths: {
     '/{indexName}/documents': {
       get: {
